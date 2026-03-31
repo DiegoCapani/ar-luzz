@@ -3,20 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ar-gr by Diego Capani - Fixed Capture</title>
+    <title>ar-gr by Diego Capani - No Black Bars</title>
     
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
     <style>
+        /* 1. Reset totale per eliminare ogni margine o spazio */
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             overflow: hidden; background-color: #000;
         }
 
-        /* Forza il video a coprire lo schermo correttamente */
+        /* 2. FIX BANDA NERA: Forza il video a coprire l'intera area visibile */
         #arjs-video {
-            object-fit: cover !important;
+            object-fit: cover !important; /* Taglia i bordi in eccesso per riempire lo schermo */
             width: 100vw !important;
             height: 100vh !important;
             position: absolute !important;
@@ -25,20 +26,12 @@
             z-index: -1 !important;
         }
 
-        /* Pulsante Scatto */
+        /* 3. Pulsante Scatto */
         #btn-foto {
-            position: fixed;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 70px;
-            height: 70px;
-            background: white;
-            border-radius: 50%;
-            border: 5px solid rgba(0,0,0,0.2);
-            z-index: 10000;
-            cursor: pointer;
-            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
+            width: 75px; height: 75px; background: white;
+            border-radius: 50%; border: 5px solid rgba(0,0,0,0.2);
+            z-index: 10000; cursor: pointer; box-shadow: 0 0 15px rgba(0,0,0,0.5);
         }
 
         #btn-foto:active { background: #ff4444; }
@@ -59,16 +52,21 @@
         embedded 
         vr-mode-ui="enabled: false"
         renderer="preserveDrawingBuffer: true; alpha: true;"
-        arjs="sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3; debugUIEnabled: false;">
+        arjs="sourceType: webcam; 
+              detectionMode: mono_and_matrix; 
+              matrixCodeType: 3x3; 
+              debugUIEnabled: false;
+              sourceWidth: 1280; sourceHeight: 720;
+              displayWidth: 1280; displayHeight: 720;">
 
         <a-assets>
             <a-asset-item id="modello-1" src="man.glb"></a-asset-item>
         </a-assets>
 
-        <a-marker type="barcode" value="2">
+        <a-marker type="barcode" value="1">
             <a-entity 
                 gltf-model="#modello-1" 
-                scale="6 6 6" 
+                scale="3 3 3" 
                 position="0 0 0" 
                 rotation="0 90 0">
             </a-entity>
@@ -78,7 +76,7 @@
     </a-scene>
 
     <script>
-        // Assicura che la webcam sia visibile sotto il 3D
+        // Rimuove lo sfondo nero della scena per mostrare la webcam sotto
         const observer = new MutationObserver(() => {
             const video = document.querySelector('#arjs-video');
             if (video) {
@@ -88,7 +86,7 @@
         });
         observer.observe(document.body, { childList: true });
 
-        // LOGICA DI SCATTO SENZA DECENTRAMENTO
+        // LOGICA DI SCATTO (Sincronizzata con la visuale a schermo pieno)
         document.querySelector('#btn-foto').addEventListener('click', function() {
             const scene = document.querySelector('a-scene');
             const video = document.querySelector('#arjs-video');
@@ -96,46 +94,41 @@
             
             if (!video) return;
 
-            // 1. Il canvas finale avrà le dimensioni esatte della visuale dell'utente (lo schermo)
             const canvas = document.createElement('canvas');
             canvas.width = window.innerWidth * window.devicePixelRatio;
             canvas.height = window.innerHeight * window.devicePixelRatio;
             const ctx = canvas.getContext('2d');
 
-            // Flash visivo
             flash.style.opacity = "1";
             setTimeout(() => { flash.style.opacity = "0"; }, 100);
 
-            // 2. Disegna la WEBCAM adattandola al canvas (ritaglio "cover")
+            // Calcolo ritaglio video per farlo coincidere con l'object-fit: cover del CSS
             const vWidth = video.videoWidth;
             const vHeight = video.videoHeight;
             const targetRatio = canvas.width / canvas.height;
             const videoRatio = vWidth / vHeight;
 
             let sX, sY, sW, sH;
-
             if (videoRatio > targetRatio) {
-                // Video più largo dello schermo
                 sH = vHeight;
                 sW = vHeight * targetRatio;
                 sX = (vWidth - sW) / 2;
                 sY = 0;
             } else {
-                // Video più stretto dello schermo
                 sW = vWidth;
                 sH = vWidth / targetRatio;
                 sX = 0;
                 sY = (vHeight - sH) / 2;
             }
 
+            // Disegna webcam
             ctx.drawImage(video, sX, sY, sW, sH, 0, 0, canvas.width, canvas.height);
 
-            // 3. Disegna il LIVELLO 3D (A-Frame)
-            // Poiché A-Frame è già adattato allo schermo, lo disegniamo sopra 1:1
+            // Forza rendering 3D e disegna sopra
             scene.renderer.render(scene.object3D, scene.camera);
             ctx.drawImage(scene.canvas, 0, 0, canvas.width, canvas.height);
 
-            // 4. Download
+            // Scarica foto
             const link = document.createElement('a');
             link.download = `AR_Snapshot_${Date.now()}.png`;
             link.href = canvas.toDataURL('image/png');
