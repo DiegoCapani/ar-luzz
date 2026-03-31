@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AR 16:9 Hologram - MP4 Barcode 2</title>
+    <title>AR 16:9 Hologram - Autoplay No Music</title>
     
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
@@ -11,13 +11,11 @@
     <script>
         /**
          * SHADER CHROMAKEY PROFESSIONALE
-         * Rimuove il verde (#00FF00) in tempo reale.
-         * Se il tuo video ha uno sfondo Blu, cambia 'color' in {r: 0, g: 0, b: 1}.
          */
         AFRAME.registerShader('chromakey-green', {
             schema: {
                 src: {type: 'map'},
-                color: {type: 'color', default: {r: 0, g: 1, b: 0}}, // Verde standard
+                color: {type: 'color', default: {r: 0, g: 1, b: 0}},
                 threshold: {type: 'number', default: 0.4}
             },
             init: function(data) {
@@ -41,10 +39,9 @@
                         varying vec2 vUv;
                         void main() {
                             vec4 texColor = texture2D(tex, vUv);
-                            // Calcola quanto il colore del pixel è vicino al verde target
                             float dist = distance(texColor.rgb, color);
                             if (dist < threshold) {
-                                discard; // Rende il pixel trasparente
+                                discard;
                             }
                             gl_FragColor = texColor;
                         }
@@ -62,9 +59,7 @@
 
     <style>
         body { margin: 0; overflow: hidden; background: #000; }
-        /* Ottimizzazione video webcam */
         #arjs-video { object-fit: cover !important; width: 100vw !important; height: 100vh !important; }
-        /* Overlay istruzioni */
         #ar-overlay {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
             z-index: 1000; background: rgba(0,0,0,0.8); color: white;
@@ -76,7 +71,7 @@
 
 <body style="margin: 0px; overflow: hidden;">
 
-    <div id="ar-overlay">Inquadra Barcode 2 <br><strong>TOCCA PER L'AUDIO</strong></div>
+    <div id="ar-overlay">Inquadra Barcode 2 <br><strong>Installazione Virtuale Attiva</strong></div>
 
     <a-scene embedded vr-mode-ui="enabled: false" 
              arjs="sourceType: webcam; 
@@ -89,11 +84,49 @@
             <video id="vid" 
                    src="vd2-loop.mp4" 
                    loop="true" 
-                   autoplay 
-                   muted 
+                   autoplay="true" 
+                   muted="true" 
                    playsinline 
                    webkit-playsinline
                    crossorigin="anonymous">
             </video>
-            <audio id="musica" src="musica.mp3" loop="true" crossorigin="anonymous"></audio>
         </a-assets>
+
+        <a-marker type="barcode" value="2">
+            <a-plane 
+                src="#vid"
+                position="0 1 0" 
+                rotation="0 90 0" 
+                width="2.0" 
+                height="1.125" 
+                material="shader: chromakey-green; src: #vid; color: 0 1 0; threshold: 0.45; side: double;">
+            </a-plane>
+        </a-marker>
+
+        <a-entity camera></a-entity>
+    </a-scene>
+
+    <script>
+        const video = document.querySelector('#vid');
+        const overlay = document.querySelector('#ar-overlay');
+
+        // Fa sparire l'overlay al primo tocco e assicura il play
+        window.addEventListener('click', function() {
+            video.play();
+            overlay.style.opacity = '0.5'; // Rende l'overlay meno invasivo dopo l'interazione
+        }, { once: true });
+
+        // Gestione Play/Pause automatica basata sulla visibilità del marker
+        const marker = document.querySelector('a-marker');
+        
+        marker.addEventListener('markerFound', function() {
+            video.play();
+        });
+
+        marker.addEventListener('markerLost', function() {
+            video.pause();
+        });
+    </script>
+
+</body>
+</html>
