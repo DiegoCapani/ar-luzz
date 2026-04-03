@@ -62,7 +62,13 @@
         <img id="posa6" src="assets/luzzetti6.png" crossorigin="anonymous">
     </a-assets>
 
-    <a-marker preset="hiro" keep-visible id="marker">
+  <!--  <a-marker preset="hiro" keep-visible id="marker"> -->
+    <a-marker preset="hiro" 
+              smooth="true" 
+              smoothCount="10" 
+              keep-visible
+              id="marker">
+        
         <a-entity id="wrapper" rotation="0 0 0">
             <a-plane
                 id="personaggio"
