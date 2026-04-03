@@ -124,7 +124,7 @@
         cambiaPosaRandom();
 
         // Countdown
-        for(let i=3; i>0; i--){
+        for(let i=0; i>0; i--){
             countdownEl.style.display="block";
             countdownEl.innerText=i;
             await new Promise(r=>setTimeout(r,1000));
