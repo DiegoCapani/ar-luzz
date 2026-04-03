@@ -82,35 +82,16 @@
 </a-scene>
 
 <script>
-    // --- 1. NUOVO COMPONENTE LOOK-AT STABILIZZATO (BLINDA L'ASSE Z) ---
-    AFRAME.registerComponent('stabilized-look-at', {
+   
+    // --- 1. LOOK-AT VERTICALE ---
+    AFRAME.registerComponent('vertical-look-at', {
         tick: function () {
             const target = document.querySelector('#main-camera');
             if (!target) return;
-
-            // 1. Otteniamo la posizione della camera
-            const targetPos = new THREE.Vector3();
-            target.object3D.getWorldPosition(targetPos);
-            
-            // 2. Otteniamo la nostra posizione
-            const myPos = new THREE.Vector3();
-            this.el.object3D.getWorldPosition(myPos);
-
-            // 3. Calcoliamo la direzione (vettore) tra noi e la camera
-            const direction = new THREE.Vector3().subVectors(targetPos, myPos);
-
-            // 4. IMPORTANTISSIMO: Annulliamo la componente verticale (Y) della direzione
-            // Questo "costringe" il calcolo a ignorare se il telefono è alto, basso o inclinato a volante
-            direction.y = 0;
-
-            // 5. Creiamo una matrice di rotazione provvisoria che "guarda" la direzione pulita
-            const helper = new THREE.Object3D();
-            helper.lookAt(direction);
-
-            // 6. Applichiamo SOLO la rotazione Y risultante al personaggio
-            // Lasciamo X e Z esplicitamente a 0 (niente effetto volante, niente taglio strano)
-            // this.el.object3D.rotation.set(0, helper.rotation.y, 90);
-             this.el.object3D.lookAt(targetPos.x, myPos.y, targetPos.z);
+            const targetPos = target.object3D.position;
+            const myPos = this.el.object3D.position;
+           this.el.object3D.rotation.set(0, helper.rotation.y, 0);
+          
         }
     });
 
