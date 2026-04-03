@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>AR Selfie - 6 Pose Giga</title>
+    <title>AR Selfie - Flash e Suono</title>
 
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
@@ -22,13 +22,30 @@
             font-size:120px; color:white; text-shadow:0 0 20px black;
             font-weight: bold; z-index:1000; display:none; pointer-events: none;
         }
+
+        /* STILE PER IL FLASH */
+        #flash {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; opacity: 0; z-index: 1001; pointer-events: none;
+        }
+        .flash-active {
+            animation: flashAnim 0.3s ease-out;
+        }
+        @keyframes flashAnim {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
     </style>
 </head>
 
 <body>
 
+<div id="flash"></div>
 <div id="scatta"></div>
 <div id="countdown"></div>
+
+<audio id="audioScatto" src="assets/shutter.mp3" preload="auto"></audio>
 
 <a-scene
     embedded
@@ -46,7 +63,6 @@
     </a-assets>
 
     <a-marker preset="hiro" keep-visible id="marker">
-        
         <a-entity id="wrapper" rotation="0 0 0">
             <a-plane
                 id="personaggio"
@@ -60,7 +76,6 @@
                 vertical-look-at>
             </a-plane>
         </a-entity>
-
     </a-marker>
 
     <a-entity id="main-camera" camera="far: 10000; near: 0.1;"></a-entity>
@@ -68,7 +83,7 @@
 </a-scene>
 
 <script>
-    // --- 1. COMPONENTE LOOK-AT VERTICALE ---
+    // --- 1. LOOK-AT VERTICALE ---
     AFRAME.registerComponent('vertical-look-at', {
         tick: function () {
             const target = document.querySelector('#main-camera');
@@ -79,7 +94,7 @@
         }
     });
 
-    // --- 2. COMPONENTE GHOST ---
+    // --- 2. KEEP VISIBLE ---
     AFRAME.registerComponent('keep-visible', {
         init: function () {
             let entity = this.el.querySelector('#personaggio');
@@ -88,40 +103,46 @@
         }
     });
 
-    // --- 3. FUNZIONE CAMBIO POSA RANDOM (Aggiornata per 6 immagini) ---
+    // --- 3. CAMBIO POSA RANDOM ---
     function cambiaPosaRandom() {
         const personaggio = document.querySelector("#personaggio");
-        // Array aggiornato con i 6 ID degli assets
         const pose = ["#posa1", "#posa2", "#posa3", "#posa4", "#posa5", "#posa6"];
-        
-        // Scegliamo un ID a caso dall'array
         const scelta = pose[Math.floor(Math.random() * pose.length)];
-        
-        // Applichiamo la nuova texture direttamente al materiale
         personaggio.setAttribute("material", "src", scelta);
     }
 
-    // --- 4. LOGICA PULSANTE ---
+    // --- 4. LOGICA PULSANTE, FLASH E SUONO ---
     const btn = document.getElementById("scatta");
     const countdownEl = document.getElementById("countdown");
+    const flashEl = document.getElementById("flash");
+    const audioScatto = document.getElementById("audioScatto");
 
     btn.onclick = async () => {
         btn.style.pointerEvents = "none";
-        btn.style.opacity = "0.5"; // Feedback: tasto disattivato
+        btn.style.opacity = "0.5";
 
-        // Cambia la posa all'inizio del countdown
         cambiaPosaRandom();
 
+        // Countdown
         for(let i=3; i>0; i--){
             countdownEl.style.display="block";
             countdownEl.innerText=i;
             await new Promise(r=>setTimeout(r,1000));
         }
         countdownEl.style.display="none";
+
+        // EFFETTO FLASH
+        flashEl.classList.add("flash-active");
+        setTimeout(() => { flashEl.classList.remove("flash-active"); }, 300);
+
+        // EFFETTO SUONO
+        audioScatto.play();
+
+        // ESECUZIONE SCATTO
         scattaFoto();
         
         btn.style.pointerEvents = "auto";
-        btn.style.opacity = "1"; // Feedback: tasto riattivato
+        btn.style.opacity = "1";
     };
 
     // --- 5. LOGICA SCATTO FOTO ---
