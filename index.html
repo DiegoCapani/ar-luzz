@@ -47,11 +47,11 @@
 
 <audio id="audioScatto" src="assets/shutter.mp3" preload="auto"></audio>
 
-    <a-scene
+<a-scene
     embedded
     vr-mode-ui="enabled:false"
     renderer="logarithmicDepthBuffer:true; alpha:true; preserveDrawingBuffer:true; antialias: true;"
-    arjs="sourceType:webcam; trackingMethod:best; detectionMode: mono_and_matrix; matrixCodeType: 3x3; debugUIEnabled:false; canvasWidth:1280; canvasHeight:720;">
+    arjs="sourceType:webcam; trackingMethod:best; debugUIEnabled:false; canvasWidth:1280; canvasHeight:720;">
 
     <a-assets>
         <img id="posa1" src="assets/luzzetti1.png" crossorigin="anonymous">
@@ -62,22 +62,14 @@
         <img id="posa6" src="assets/luzzetti6.png" crossorigin="anonymous">
     </a-assets>
 
-   <a-marker 
-    preset="hiro" 
-    keep-visible 
-    id="marker"
-    smooth="true" 
-    smoothCount="15" 
-    smoothTolerance="0.01" 
-    smoothThreshold="5">
-       
+    <a-marker preset="hiro" keep-visible id="marker">
         <a-entity id="wrapper" rotation="0 0 0">
             <a-plane
                 id="personaggio"
                 src="#posa1"
                 position="0 0 -0.5" 
-                width="17" 
-                height="17"
+                width="15" 
+                height="15"
                 transparent="true"
                 alpha-test="0.5"
                 shader="flat"
