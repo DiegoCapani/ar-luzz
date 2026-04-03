@@ -71,7 +71,7 @@
     smoothTolerance="0.01" 
     smoothThreshold="5">
        
-        <a-entity id="wrapper" rotation="0 0 0">
+        <a-entity id="wrapper" rotation="0 90 0">
             <a-plane
                 id="personaggio"
                 src="#posa1"
@@ -111,7 +111,7 @@
         const angle = Math.atan2(dx, dz);
 
         // ruota SOLO sull'asse Y
-        this.el.object3D.rotation.set(0, 0, angle);
+        this.el.object3D.rotation.set(0, angle, 0);
     }
 });
 
